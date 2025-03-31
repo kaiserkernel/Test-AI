@@ -1,26 +1,42 @@
 import React, { useState, useEffect, useRef } from "react";
 
 const App = () => {
+  // State for managing user input
   const [message, setMessage] = useState("");
+
+  // Stores suggestions received from the backend
   const [suggestions, setSuggestions] = useState([]);
+
+  // Stores the history of messages (user and agent)
   const [history, setHistory] = useState([]);
+
+  // Loading state for when the AI is "typing"
   const [loading, setLoading] = useState(false);
+
+  // Ref to keep the input field focused
   const inputRef = useRef(null);
 
+  // Auto-focus input field when component mounts
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
 
+  // Function to send message to backend
   const handleSend = async () => {
-    if (!message.trim()) return;
+    if (!message.trim()) return; // Prevent sending empty messages
 
+     // Add user message to history
     const userMessage = { role: "user", content: message };
     const updatedHistory = [...history, userMessage];
     setHistory(updatedHistory);
-    setMessage("");
-    setLoading(true);
+    
+    // Initialize
+    setMessage(""); // Clear input field
+    setSuggestions([]); // Reset suggestions
+    setLoading(true); // Show typing indicator
 
     try {
+      // Send message to backend
       const res = await fetch("http://localhost:5000/suggestions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -37,12 +53,14 @@ const App = () => {
     }
   };
 
+  // Handles "Enter" key press to send the message
   const handleKeyPress = (e) => {
     if (e.key === "Enter") {
       handleSend();
     }
   };
 
+  // When user clicks a suggestion, insert it into input field
   const handleSuggestionClick = (text) => {
     setMessage(text);
     inputRef.current?.focus();
@@ -51,6 +69,8 @@ const App = () => {
   return (
     <div style={{ padding: 20, maxWidth: 500, margin: "auto", fontFamily: "Arial" }}>
       <h2>AI Messaging Panel</h2>
+      
+      {/* Input Field and Send Button */}
       <div style={{ display: "flex", gap: 10, marginBottom: 10 }}>
         <input
           type="text"
@@ -71,6 +91,7 @@ const App = () => {
         </button>
       </div>
 
+      {/* Loading Indicator */}
       {loading && <p>Loading suggestions...</p>}
 
       <div style={{ marginTop: 20 }}>
@@ -94,6 +115,7 @@ const App = () => {
         </div>
       </div>
 
+      {/* Message History */}
       <div style={{ marginTop: 20 }}>
         <strong>Message History:</strong>
         <div>
